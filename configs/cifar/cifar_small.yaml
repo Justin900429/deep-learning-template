@@ -1,0 +1,4 @@
+_BASE_: ../default.yaml
+PROJECT_DIR: cifar-small
+MODEL:
+  BASE_DIM: 32

@@ -1,0 +1,14 @@
+--index-url https://download.pytorch.org/whl/cu118
+torch==2.2.2
+torchvision==0.17.2
+loguru==0.6.0
+numpy==1.23.4
+opencv-python-headless==4.6.0.66
+scikit-learn==1.2.1
+tabulate==0.9.0
+yacs==0.1.8
+colorama==0.4.6
+accelerate==0.29.3
+aim
+wandb
+gdown
