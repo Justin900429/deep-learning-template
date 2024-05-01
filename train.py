@@ -5,23 +5,14 @@ import time
 
 import accelerate
 import torch
-from colorama import Fore, Style
 from loguru import logger
-from tabulate import tabulate
 from yacs.config import CfgNode as CN
 
 from config import config_to_str, create_cfg, merge_possible_with_base, show_config
 from dataset import get_loader
 from modeling import build_loss, build_model
+from utils.base_trainer import BaseTrainer
 from utils.meter import AverageMeter, MetricMeter
-
-
-def human_format(num):
-    magnitude = 0
-    while abs(num) >= 1000:
-        magnitude += 1
-        num /= 1000.0
-    return "%.3f%s" % (num, ["", "K", "M", "G", "T", "P"][magnitude])
 
 
 def parse_args():
@@ -36,7 +27,7 @@ def parse_args():
     return parser.parse_args()
 
 
-class Trainer:
+class Trainer(BaseTrainer):
     def __init__(self, cfg: CN):
         # Setup accelerator for distributed training (or single GPU) automatically
         config = accelerate.utils.ProjectConfiguration(
@@ -192,44 +183,6 @@ class Trainer:
                     f"best_model_epoch_{self.current_epoch}.pth",
                 ),
             )
-
-    def print_dataset_details(self):
-        table = tabulate(
-            [
-                ["Train", len(self.train_loader.dataset)],
-                ["Validation", len(self.val_loader.dataset)],
-            ],
-            headers=["Dataset", "Size"],
-            tablefmt="fancy_grid",
-        )
-        logger.info("Dataset details:")
-        print(f"{Fore.GREEN}", end="")
-        print(table)
-        print(f"{Style.RESET_ALL}", end="")
-
-    def print_model_details(self):
-        trainable_params = sum(p.numel() for p in self.model.parameters() if p.requires_grad)
-        non_trainable_params = sum(
-            p.numel() for p in self.model.parameters() if not p.requires_grad
-        )
-        total_params = trainable_params + non_trainable_params
-        table = tabulate(
-            [
-                ["Trainable", human_format(trainable_params)],
-                ["Non-trainable", human_format(non_trainable_params)],
-                ["Total", human_format(total_params)],
-            ],
-            headers=["Parameters", "Size"],
-            tablefmt="fancy_grid",
-        )
-        logger.info("Model details:")
-        print(f"{Fore.GREEN}", end="")
-        print(table)
-        print(f"{Style.RESET_ALL}", end="")
-
-    def print_training_details(self):
-        self.print_dataset_details()
-        self.print_model_details()
 
     def train(self):
         if self.accelerator.is_main_process:
