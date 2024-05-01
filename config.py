@@ -15,6 +15,7 @@ def create_cfg():
     cfg = CN()
     cfg._BASE_ = None  # This is used to successed the base configuration
     cfg.PROJECT_DIR = None  # Name of the project directory for saving logs, checkpoints, etc.
+    cfg.LOG_DIR = "logs"  # Directory for saving logs
     cfg.PROJECT_LOG_WITH = [
         "tensorboard"
     ]  # Log with different trackers. Please check accelerate for more details.
