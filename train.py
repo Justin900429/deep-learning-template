@@ -23,6 +23,7 @@ def parse_args():
         type=str,
         help="Path to the configuration file",
     )
+    parser.add_argument("--seed", default=42, type=int, help="Seed for reproducibility")
     parser.add_argument("--opts", nargs=argparse.REMAINDER, default=None)
     return parser.parse_args()
 
@@ -32,7 +33,7 @@ class Trainer(BaseTrainer):
         # Setup accelerator for distributed training (or single GPU) automatically
         config = accelerate.utils.ProjectConfiguration(
             project_dir=cfg.PROJECT_DIR,
-            logging_dir="logs",
+            logging_dir=cfg.LOG_DIR,
         )
         self.accelerator = accelerate.Accelerator(
             log_with=cfg.PROJECT_LOG_WITH, project_config=config
@@ -211,6 +212,9 @@ if __name__ == "__main__":
         merge_possible_with_base(cfg, args.config)
     if args.opts:
         cfg.merge_from_list(args.opts)
+
+    # Set seed for reproducibility
+    accelerate.utils.set_seed(args.seed)
     trainer = Trainer(cfg)
     trainer.train()
     trainer.close()
