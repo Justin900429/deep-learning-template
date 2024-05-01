@@ -23,6 +23,4 @@ class ClassicModel(nn.Module):
 
 
 def build_model(cfg) -> ClassicModel:
-    return ClassicModel(
-        cfg.MODEL.IN_CHANNELS, cfg.MODEL.BASE_DIM, cfg.MODEL.NUM_CLASSES
-    )
+    return ClassicModel(cfg.MODEL.IN_CHANNELS, cfg.MODEL.BASE_DIM, cfg.MODEL.NUM_CLASSES)
