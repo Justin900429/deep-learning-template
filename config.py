@@ -15,7 +15,7 @@ def create_cfg():
     cfg = CN()
     cfg._BASE_ = None
     cfg.PROJECT_DIR = None
-    cfg.PROJECT_LOG_WITH = ["tensorboard", "wandb"]
+    cfg.PROJECT_LOG_WITH = ["tensorboard"]
 
     # ==========  Model   ==========
     cfg.MODEL = CN()
