@@ -13,9 +13,11 @@ def create_cfg():
     Please feel free to add more configuration options as needed.
     """
     cfg = CN()
-    cfg._BASE_ = None
-    cfg.PROJECT_DIR = None
-    cfg.PROJECT_LOG_WITH = ["tensorboard"]
+    cfg._BASE_ = None  # This is used to successed the base configuration
+    cfg.PROJECT_DIR = None  # Name of the project directory for saving logs, checkpoints, etc.
+    cfg.PROJECT_LOG_WITH = [
+        "tensorboard"
+    ]  # Log with different trackers. Please check accelerate for more details.
 
     # ==========  Model   ==========
     cfg.MODEL = CN()
@@ -34,20 +36,20 @@ def create_cfg():
     # ======= Training =======
     cfg.TRAIN = CN()
     cfg.TRAIN.BATCH_SIZE = 32
-    cfg.TRAIN.VAL_FREQ = 1
+    cfg.TRAIN.VAL_FREQ = 1  # Validate every epoch, change to suit your needs
     cfg.TRAIN.EPOCHS = 50
     cfg.TRAIN.NUM_WORKERS = 4
-    cfg.TRAIN.ACCUM_ITER = 8
+    cfg.TRAIN.ACCUM_ITER = 0  # Gradient accumulation controlled with accelerate
     cfg.TRAIN.LR = 0.0003
     cfg.TRAIN.WEIGHT_DECAY = 0.0001
-    cfg.TRAIN.LOG_EVERY_STEP = 100
-    cfg.TRAIN.RESUME_CHECKPOINT = None
+    cfg.TRAIN.LOG_EVERY_STEP = 100  # Log every 100 steps for training
+    cfg.TRAIN.RESUME_CHECKPOINT = None  # Path to the checkpoint for resuming training
 
     # ======= Evaluation =======
     cfg.EVAL = CN()
     cfg.EVAL.NUM_WORKERS = 4
     cfg.EVAL.BATCH_SIZE = cfg.TRAIN.BATCH_SIZE
-    cfg.EVAL.LOG_EVERY_STEP = 50
+    cfg.EVAL.LOG_EVERY_STEP = 50  # Log every 50 steps for evaluation
 
     return cfg
 
