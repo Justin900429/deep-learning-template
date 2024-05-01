@@ -12,3 +12,5 @@ accelerate==0.29.3
 aim
 wandb
 gdown
+black
+isort
