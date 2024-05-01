@@ -15,15 +15,61 @@ Welcome to our Deep Learning Project Template, crafted for researchers and devel
 
 Our project is organized as follows to help you navigate and manage the codebase effectively:
 
-- `configs/`: Configuration files for setting up different aspects of your models and training environments.
-- `dataset/`: Modules to handle data loading and preprocessing.
-- `modeling/`: Definition and instantiation of the neural network models and loss function.
-- `utils/`: Utilities for various tasks like logging and performance metrics.
-- `train.py`: The main script to start the training process.
+```plaintext
+📦deep-learning-template
+ ├── 📂configs                # Configuration files for experiments
+ │   ├── 📂cifar
+ │   │   ├── cifar_big.yaml   # Configuration for a larger model
+ │   │   └── cifar_small.yaml # Configuration for a smaller model
+ │   └── 📄default.yaml       # Default config for all experiemnts
+ ├── 📂dataset                # Modules for data handling
+ │   └── 📄data_loader.py     # Data loader script
+ ├── 📂modeling               # Neural network models and loss functions
+ │   └── 📄model.py           # Example model file
+ ├── 📂utils                  # Utility scripts for various tasks
+ │   ├── 📄base_trainer.py    # Base Trainer class for printing training details
+ │   ├── 📄logger.py          # Logging utilities
+ │   └── 📄metrics.py         # Performance metrics
+ ├── 📄.gitignore             # Specifies intentionally untracked files to ignore
+ ├── 📄LICENSE                # License file for the project
+ ├── 📄README.md              # README file with project details
+ ├── 📄config.py              # Main configuration script
+ ├── 📄linter.sh              # Shell script for formating the code
+ ├── 📄requirements.txt       # Dependencies and libraries
+ └── 📄train.py               # Main training script
+```
 
-## ⚙️ Config Setup
+## ⚙️ Configuration
 
-Configure your models and training setups with ease. Modify the `config.py` file to suit your experimental needs. Our system uses [YACS](https://github.com/rbgirshick/yacs), which allows for a hierarchical configuration with overrides for command-line options.
+Configure your models and training setups with ease. Modify the `config.py` file to suit your experimental needs. Our system uses [YACS](https://github.com/rbgirshick/yacs), which allows for a hierarchical configuration with overrides for command-line options. The recommeneded structure we used:
+
+```python
+# Basic setup of the project
+cfg = CN()
+cfg._BASE_ = None
+cfg.PROJECT_DIR = None
+cfg.PROJECT_LOG_WITH = ["tensorboard"]
+
+# Control the modeling settings
+cfg.MODEL = CN()
+# ...
+
+# Control the loss settings
+cfg.LOSS = CN()
+# ...
+
+# Control the dataset settings (e.g., path)
+cfg.DATA = CN()
+# ...
+
+# Control the training setup (e.g., lr, epoch)
+cfg.TRAIN = CN()
+# ...
+
+# Control the training setup (e.g., batch size)
+cfg.EVAL = CN()
+# ...
+```
 
 ## 🏋️‍♂️ Training
 
@@ -36,6 +82,15 @@ python train.py --config configs/your_config.yaml
 
 # Concrete example
 python traing.py --config configs/cifar/cifar-small.yaml
+```
+
+After the training start, users can find the training folder called `logs`. To modify the default setting, please change the option `LOG_DIR`. Followed by `logs` is the `PROJECT_DIR` defined in the config file.
+
+```
+📦{LOG_DIR}/{PROJECT_DIR}
+ ├── 📂checkpoint           # Folder for saving checkpoints 
+ ├── 📂...                  # Other files setup by tracker(s)
+ └── 📄train.log            # Logs during training 
 ```
 
 ### Override the config with command line
@@ -63,12 +118,29 @@ accelerate launch --multi_gpu --num_processes=2 train.py --config configs/cifar/
     --opts TRAIN.RESUME_CHECKPOINT logs/cifar-small/checkpoint/best_model_epoch_10.pth
 ```
 
+### Tracker
+
+Trackers such as `tensorboard`, `wandb`, and `aim` can be setup from the `PROJECT_LOG_WITH` option. We support multiple trackers at once through accelerate! Users are encouraged to find our which is the best for the project from [here](https://huggingface.co/docs/accelerate/usage_guides/tracking). Below are some examples to open the local monitor:
+
+```shell
+# tensorboard
+tensorboard --logdir logs
+
+# aim
+aim up --repo logs
+```
+
 ## 🛠 How to Add Your Code?
 
 1. **Integrating New Models:** Place your model files in the `modeling/` folder and update the configurations accordingly.
 2. **Adding New Datasets:** Implement data handling in the `dataset/` folder and reference it in your config files.
 3. **Utility Scripts:** Enhance functionality by adding utility scripts in the `utils/` folder.
 4. **Customized Training Process**: Please change the `train.py` to modify the training process.
+
+## TODO
+
+- [ ] Add example projects with this template.
+- [ ] Support iteration based training with infinite loader.
 
 ## 🙌 Special Thanks
 
