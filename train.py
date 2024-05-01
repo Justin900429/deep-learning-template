@@ -5,13 +5,23 @@ import time
 
 import accelerate
 import torch
+from colorama import Fore, Style
 from loguru import logger
+from tabulate import tabulate
 from yacs.config import CfgNode as CN
 
 from config import config_to_str, create_cfg, merge_possible_with_base, show_config
 from dataset import get_loader
 from modeling import build_loss, build_model
 from utils.meter import AverageMeter, MetricMeter
+
+
+def human_format(num):
+    magnitude = 0
+    while abs(num) >= 1000:
+        magnitude += 1
+        num /= 1000.0
+    return "%.3f%s" % (num, ["", "K", "M", "G", "T", "P"][magnitude])
 
 
 def parse_args():
@@ -28,8 +38,6 @@ def parse_args():
 
 class Trainer:
     def __init__(self, cfg: CN):
-        os.makedirs(cfg.PROJECT_DIR, exist_ok=True)
-
         # Setup accelerator for distributed training (or single GPU) automatically
         config = accelerate.utils.ProjectConfiguration(
             project_dir=cfg.PROJECT_DIR,
@@ -65,11 +73,9 @@ class Trainer:
             self.loss_fn,
             self.train_loader,
             self.val_loader,
-        ) = self.accelerator.prepare(
-            model, optimizer, loss_fn, train_loader, val_loader
-        )
+        ) = self.accelerator.prepare(model, optimizer, loss_fn, train_loader, val_loader)
         self.min_loss = float("inf")
-        self.current_epoch = 0
+        self.current_epoch = 1
 
         # Monitor for the time and the loss
         self.loss_meter = MetricMeter()
@@ -95,9 +101,10 @@ class Trainer:
         self.accelerator.unwrap_model(self.model).load_state_dict(checkpoint["model"])
         self.optimizer.optimizer.load_state_dict(checkpoint["optimizer"])
         self.current_epoch = checkpoint["epoch"] + 1
+        self.max_acc = checkpoint.get("max_acc", 0)
         if self.accelerator.is_main_process:
             logger.info(
-                f"Checkpoint loaded from {self.cfg.MODEL.CHECKPOINT}, continue training or validate..."
+                f"Checkpoint loaded from {self.cfg.TRAIN.RESUME_CHECKPOINT}, continue training or validate..."
             )
         del checkpoint
 
@@ -164,8 +171,7 @@ class Trainer:
                 {
                     "val_acc": total_acc,
                 },
-                step=(self.current_epoch - 1) * len(self.val_loader)
-                + len(self.val_loader),
+                step=(self.current_epoch - 1) * len(self.train_loader),  # Use train steps
             )
         if self.accelerator.is_main_process and total_acc > self.max_acc:
             save_path = os.path.join("logs", self.cfg.PROJECT_DIR, "checkpoint")
@@ -179,6 +185,7 @@ class Trainer:
                     "model": self.accelerator.unwrap_model(self.model).state_dict(),
                     "optimizer": self.optimizer.optimizer.state_dict(),
                     "epoch": self.current_epoch,
+                    "max_acc": self.max_acc,
                 },
                 os.path.join(
                     save_path,
@@ -186,8 +193,48 @@ class Trainer:
                 ),
             )
 
+    def print_dataset_details(self):
+        table = tabulate(
+            [
+                ["Train", len(self.train_loader.dataset)],
+                ["Validation", len(self.val_loader.dataset)],
+            ],
+            headers=["Dataset", "Size"],
+            tablefmt="fancy_grid",
+        )
+        logger.info("Dataset details:")
+        print(f"{Fore.GREEN}", end="")
+        print(table)
+        print(f"{Style.RESET_ALL}", end="")
+
+    def print_model_details(self):
+        trainable_params = sum(p.numel() for p in self.model.parameters() if p.requires_grad)
+        non_trainable_params = sum(
+            p.numel() for p in self.model.parameters() if not p.requires_grad
+        )
+        total_params = trainable_params + non_trainable_params
+        table = tabulate(
+            [
+                ["Trainable", human_format(trainable_params)],
+                ["Non-trainable", human_format(non_trainable_params)],
+                ["Total", human_format(total_params)],
+            ],
+            headers=["Parameters", "Size"],
+            tablefmt="fancy_grid",
+        )
+        logger.info("Model details:")
+        print(f"{Fore.GREEN}", end="")
+        print(table)
+        print(f"{Style.RESET_ALL}", end="")
+
+    def print_training_details(self):
+        self.print_dataset_details()
+        self.print_model_details()
+
     def train(self):
-        for epoch in range(1, self.cfg.TRAIN.EPOCHS + 1):
+        if self.accelerator.is_main_process:
+            self.print_training_details()
+        for epoch in range(self.current_epoch, self.cfg.TRAIN.EPOCHS + 1):
             self.current_epoch = epoch
             self._train_one_epoch()
             if epoch % self.cfg.TRAIN.VAL_FREQ == 0:
