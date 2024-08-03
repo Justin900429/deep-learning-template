@@ -36,7 +36,7 @@ Our project is organized as follows to help you navigate and manage the codebase
  ├── 📄config.py              # Main configuration script
  ├── 📄linter.sh              # Shell script for formating the code
  ├── 📄requirements.txt       # Dependencies and libraries
- └── 📄train.py               # Main training script
+ └── 📄engine.py              # Main training and validation script
 ```
 
 ## ⚙️ Configuration
@@ -78,7 +78,7 @@ cfg.EVAL = CN()
 To start a training, run:
 
 ```shell
-python train.py --config configs/your_config.yaml
+python engine.py --config configs/your_config.yaml
 
 # Concrete example
 python traing.py --config configs/cifar/cifar-small.yaml
@@ -98,10 +98,10 @@ After the training start, users can find the training folder called `logs`. To m
 Users can override the options with the `--opts` flag. For instance, to resume the training:
 
 ```shell
-python train.py --config configs/your_config.yaml --opts TRAIN.RESUME_CHECKPOINT path/to/checkpoint
+python engine.py --config configs/your_config.yaml --opts TRAIN.RESUME_CHECKPOINT path/to/checkpoint
 
 # Concrete example
-python train.py --config configs/cifar/cifar-small.yaml --opts TRAIN.RESUME_CHECKPOINT logs/cifar-small/checkpoint/best_model_epoch_10.pth
+python engine.py --config configs/cifar/cifar-small.yaml --opts TRAIN.RESUME_CHECKPOINT logs/cifar-small/checkpoint/best_model_epoch_10.pth
 ```
 
 Please check the config setup section for more details.
@@ -111,10 +111,10 @@ Please check the config setup section for more details.
 This project template is made based on [accelerate](https://github.com/huggingface/accelerate) to provide multi-GPU training. A simple example to train a model with 2 GPUs:
 
 ```shell
-accelerate launch --multi_gpu --num_processes=2 train.py --config configs/your_config.yaml --opts (optional)
+accelerate launch --multi_gpu --num_processes=2 engine.py --config configs/your_config.yaml --opts (optional)
 
 # Concrete example
-accelerate launch --multi_gpu --num_processes=2 train.py --config configs/cifar/cifar-small.yaml \
+accelerate launch --multi_gpu --num_processes=2 engine.py --config configs/cifar/cifar-small.yaml \
     --opts TRAIN.RESUME_CHECKPOINT logs/cifar-small/checkpoint/best_model_epoch_10.pth
 ```
 
@@ -135,11 +135,10 @@ aim up --repo logs
 1. **Integrating New Models:** Place your model files in the `modeling/` folder and update the configurations accordingly.
 2. **Adding New Datasets:** Implement data handling in the `dataset/` folder and reference it in your config files.
 3. **Utility Scripts:** Enhance functionality by adding utility scripts in the `utils/` folder.
-4. **Customized Training Process**: Please change the `train.py` to modify the training process.
+4. **Customized Training Process**: Please change the `engine.py` to modify the training process.
 
 ## TODO
 
-- [ ] Add example projects with this template.
 - [ ] Support iteration based training with infinite loader.
 
 ## 🙌 Special Thanks
