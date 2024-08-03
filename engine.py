@@ -11,7 +11,7 @@ from yacs.config import CfgNode as CN
 from config import config_to_str, create_cfg, merge_possible_with_base, show_config
 from dataset import get_loader
 from modeling import build_loss, build_model
-from utils.base_trainer import BaseTrainer
+from utils.base_engine import BaseEngine
 from utils.meter import AverageMeter, MetricMeter
 
 
@@ -28,7 +28,7 @@ def parse_args():
     return parser.parse_args()
 
 
-class Trainer(BaseTrainer):
+class Engine(BaseEngine):
     def __init__(self, cfg: CN):
         # Setup accelerator for distributed training (or single GPU) automatically
         config = accelerate.utils.ProjectConfiguration(
@@ -121,7 +121,7 @@ class Trainer(BaseTrainer):
                 (loader_idx % self.cfg.TRAIN.LOG_EVERY_STEP == 0)
                 or (loader_idx == len(self.train_loader))
             ):
-                nb_future_iters = (cfg.TRAIN.EPOCHS - (self.current_epoch + 1)) * len(
+                nb_future_iters = (cfg.TRAIN.EPOCHS - (self.current_epoch - 1)) * len(
                     self.train_loader
                 ) - (loader_idx)
                 eta_seconds = self.iter_time.avg * nb_future_iters
@@ -215,6 +215,6 @@ if __name__ == "__main__":
 
     # Set seed for reproducibility
     accelerate.utils.set_seed(args.seed)
-    trainer = Trainer(cfg)
+    trainer = Engine(cfg)
     trainer.train()
     trainer.close()

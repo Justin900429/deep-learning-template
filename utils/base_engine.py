@@ -16,7 +16,7 @@ def human_format(num):
     return "%.3f%s" % (num, ["", "K", "M", "G", "T", "P"][magnitude])
 
 
-class BaseTrainer:
+class BaseEngine:
     def print_dataset_details(self):
         table = tabulate(
             [
