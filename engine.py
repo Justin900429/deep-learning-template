@@ -51,7 +51,7 @@ class Engine(BaseEngine):
 
         optimizer = torch.optim.AdamW(
             model.parameters(),
-            lr=self.cfg.TRAIN.LR,
+            lr=self.cfg.TRAIN.LR * self.accelerator.num_processes,
             weight_decay=self.cfg.TRAIN.WEIGHT_DECAY,
         )
 
