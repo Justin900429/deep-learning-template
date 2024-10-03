@@ -41,6 +41,7 @@ def create_cfg():
     cfg.TRAIN.EPOCHS = 50
     cfg.TRAIN.NUM_WORKERS = 4
     cfg.TRAIN.ACCUM_ITER = 0  # Gradient accumulation controlled with accelerate
+    cfg.TRAIN.MIXED_PRECISION = "no"  # Whether to use mixed precision training
     cfg.TRAIN.LR = 0.0003
     cfg.TRAIN.WEIGHT_DECAY = 0.0001
     cfg.TRAIN.LOG_EVERY_STEP = 100  # Log every 100 steps for training
