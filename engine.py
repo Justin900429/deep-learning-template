@@ -36,7 +36,10 @@ class Engine(BaseEngine):
             logging_dir=cfg.LOG_DIR,
         )
         self.accelerator = accelerate.Accelerator(
-            log_with=cfg.PROJECT_LOG_WITH, project_config=config
+            log_with=cfg.PROJECT_LOG_WITH, 
+            project_config=config,
+            gradient_accumulation_steps=cfg.TRAIN.ACCUM_ITER,
+            mixed_precision=cfg.TRAIN.MIXED_PRECISION,
         )
         if self.accelerator.is_main_process:
             show_config(cfg)
