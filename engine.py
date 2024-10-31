@@ -217,7 +217,7 @@ if __name__ == "__main__":
         cfg.merge_from_list(args.opts)
 
     # Set seed for reproducibility
-    accelerate.utils.set_seed(args.seed)
     trainer = Engine(cfg)
+    accelerate.utils.set_seed(args.seed, device_specific=True)
     trainer.train()
     trainer.close()
