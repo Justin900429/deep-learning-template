@@ -45,6 +45,9 @@ class MetricMeter(object):
                 v = v.item()
             self.meters[k].update(v)
 
+    def get_average(self):
+        return {f"{name}_avg": meter.avg for name, meter in self.meters.items()}
+
     def __str__(self):
         output_str = []
         for name, meter in self.meters.items():

@@ -25,6 +25,7 @@ def create_cfg():
     cfg.MODEL.IN_CHANNELS = 3
     cfg.MODEL.BASE_DIM = 16
     cfg.MODEL.NUM_CLASSES = 10
+    cfg.MODEL.RESUME_CHECKPOINT = None  # Path to the checkpoint for resuming training
 
     # ======= LOSS ========
     cfg.LOSS = CN()
@@ -40,18 +41,15 @@ def create_cfg():
     cfg.TRAIN.VAL_FREQ = 1  # Validate every epoch, change to suit your needs
     cfg.TRAIN.EPOCHS = 50
     cfg.TRAIN.NUM_WORKERS = 4
-    cfg.TRAIN.ACCUM_ITER = 0  # Gradient accumulation controlled with accelerate
+    cfg.TRAIN.ACCUM_ITER = 1  # Gradient accumulation controlled with accelerate
     cfg.TRAIN.MIXED_PRECISION = "no"  # Whether to use mixed precision training
     cfg.TRAIN.LR = 0.0003
     cfg.TRAIN.WEIGHT_DECAY = 0.0001
-    cfg.TRAIN.LOG_EVERY_STEP = 100  # Log every 100 steps for training
-    cfg.TRAIN.RESUME_CHECKPOINT = None  # Path to the checkpoint for resuming training
 
     # ======= Evaluation =======
     cfg.EVAL = CN()
     cfg.EVAL.NUM_WORKERS = 4
     cfg.EVAL.BATCH_SIZE = cfg.TRAIN.BATCH_SIZE
-    cfg.EVAL.LOG_EVERY_STEP = 50  # Log every 50 steps for evaluation
 
     return cfg
 
@@ -108,9 +106,7 @@ def show_config(cfg: CN):
         headers="keys",
         tablefmt="fancy_grid",
     )
-    print(f"{Fore.BLUE}", end="")
     print(table)
-    print(f"{Style.RESET_ALL}", end="")
 
 
 def merge_possible_with_base(cfg: CN, config_path: str):

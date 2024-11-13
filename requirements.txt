@@ -9,8 +9,8 @@ tabulate==0.9.0
 yacs==0.1.8
 colorama==0.4.6
 accelerate==0.29.3
-aim
 wandb
 gdown
 black
 isort
+rich
